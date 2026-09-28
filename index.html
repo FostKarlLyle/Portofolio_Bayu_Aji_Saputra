@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     PORTFOLIO MURNI — 100% HTML + CSS + JavaScript
+     ------------------------------------------------------------
+     Tidak ada React, tidak ada Tailwind, tidak ada library.
+     • Tampilan  → <style> di bawah (asli dari style.css)
+     • Logika    → <script> di bawah (asli dari script.js)
+     • Struktur  → HTML biasa di <body>
+     Cara oprek: ubah warna di :root, simpan, refresh browser.
+     ============================================================ -->
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Portfolio Izul Haq Nur Kholili — Mahasiswa Teknik Elektro Universitas Jember. IoT, elektronika, robotika." />
+  <title>Izul Haq Nur Kholili — Electrical Engineering Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+/* ===== 1. VARIABEL WARNA (mode gelap = default) ===== */
+:root {
+  --bg: #04060c;
+  --bg-soft: #070c16;
+  --surface: #0a1120;
+  --surface-2: #101b30;
+  --line: #1a2640;
+  --txt: #e8eefc;
+  --muted: #8fa1c0;
+  --accent: #22d3ee;
+  --accent-2: #8b5cf6;
+  --accent-3: #34d399;
+  --radius: 16px;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+/* ===== 2. MODE TERANG ===== */
+[data-theme="light"] {
+  --bg: #f2f6fc;
+  --bg-soft: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #eaf1fa;
+  --line: #d5e0ef;
+  --txt: #081020;
+  --muted: #536481;
+  --accent: #0891b2;
+  --accent-2: #6d3df0;
+  --accent-3: #0d9c72;
+}
+/* ===== 3. RESET & DASAR ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body { background: var(--bg); color: var(--txt); font-family: var(--font-body); line-height: 1.6; overflow-x: hidden; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; line-height: 1.15; }
+.container { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+section { padding: 84px 0; position: relative; }
+.text-gradient {
+  background: linear-gradient(100deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+/* ===== 4. EFEK LISTRIK DI PINGGIR ===== */
+.edge { position: fixed; top: 0; bottom: 0; width: 60px; z-index: 1; pointer-events: none; }
+.edge-left { left: 0; }
+.edge-right { right: 0; transform: scaleX(-1); }
+.edge .rail {
+  position: absolute; top: 0; bottom: 0; left: 22px; width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+  opacity: 0.35;
+}
+.edge .node {
+  position: absolute; left: 19px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); opacity: 0.6; animation: pulse-node 2.6s ease-in-out infinite;
+}
+.edge .spark {
+  position: absolute; top: 0; left: 22px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px 1px var(--accent);
+  animation: spark-fall 7s linear infinite;
+}
+.edge .bolt { position: absolute; left: 28px; animation: zap 4.5s linear infinite; }
+@media (max-width: 700px) { .edge { width: 26px; } .edge .bolt { display: none; } }
+/* ===== 5. NAVBAR ===== */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  transition: background 0.4s, border-color 0.4s;
+  border-bottom: 1px solid transparent;
+}
+header.scrolled { background: rgba(4, 6, 12, 0.82); backdrop-filter: blur(14px); border-color: var(--line); }
+[data-theme="light"] header.scrolled { background: rgba(255, 255, 255, 0.85); }
+.nav { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; }
+.logo-badge {
+  width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 11px;
+  display: grid; place-items: center; background: var(--surface-2); color: var(--accent);
+  font-family: var(--font-mono); font-size: 19px;
+}
+.nav-links { display: flex; gap: 4px; list-style: none; }
+.nav-links a {
+  text-decoration: none; font-size: 14px; color: var(--muted);
+  padding: 8px 14px; border-radius: 9px; position: relative; transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--txt); }
+.nav-links a.active { color: var(--txt); }
+.nav-links a.active::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 3px; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 2px;
+}
+.nav-actions { display: flex; gap: 8px; align-items: center; }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 11px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
+  font-size: 17px; transition: 0.3s;
+}
+.icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+  padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600;
+  border: 1px solid var(--line); transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #04060c; border: none;
+  box-shadow: 0 10px 40px -12px var(--accent);
+}
+.btn-ghost { background: var(--surface-2); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-nav { padding: 10px 18px; }
+.hamburger { display: none; }
+.progress { height: 2px; background: transparent; }
+.progress span {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+}
+.mobile-menu { display: none; }
+/* ===== 6. HERO ===== */
+.hero { min-height: 92vh; display: flex; align-items: center; text-align: center; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; top: -140px; left: 50%; transform: translateX(-50%);
+  width: 480px; height: 480px; border-radius: 50%;
+  background: var(--accent); opacity: 0.1; filter: blur(130px); pointer-events: none;
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--line); background: var(--surface-2);
+  padding: 7px 16px; border-radius: 999px;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-3); animation: blink 1.6s infinite; }
+.hero-hello { margin-top: 28px; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent); }
+.hero h1 { font-size: clamp(2.6rem, 7vw, 4.3rem); margin-top: 12px; }
+.hero-role { margin-top: 18px; display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.hero-role strong { font-size: 19px; }
+.ticker { font-family: var(--font-mono); font-size: 14px; color: var(--accent); }
+.ticker::after { content: "▍"; animation: blink 1.1s steps(2) infinite; }
+.hero-desc { max-width: 600px; margin: 22px auto 0; color: var(--muted); }
+.hero-cta { margin-top: 34px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.signal { margin: 46px auto 0; max-width: 480px; display: block; color: var(--accent); opacity: 0.7; }
+.hero-meta {
+  margin-top: 30px; display: flex; gap: 26px; justify-content: center; flex-wrap: wrap;
+  font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+}
+/* ===== 7. JUDUL SECTION ===== */
+.eyebrow {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--accent);
+  display: flex; align-items: center; gap: 12px;
+}
+.eyebrow::after { content: ""; width: 34px; height: 1px; background: linear-gradient(90deg, var(--accent), transparent); }
+.section-title { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-top: 14px; max-width: 640px; }
+.section-desc { margin-top: 14px; color: var(--muted); max-width: 640px; }
+/* ===== 8. ABOUT ===== */
+.about-grid { margin-top: 44px; display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 48px; align-items: start; }
+.photo-frame { border: 1px solid var(--line); background: var(--surface); border-radius: 24px; padding: 10px; }
+.avatar {
+  position: relative; aspect-ratio: 4/5; border-radius: 16px; overflow: hidden;
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 30% 20%, rgba(34,211,238,.25), transparent 60%),
+              radial-gradient(circle at 80% 90%, rgba(139,92,246,.3), transparent 60%), #0b1426;
+  font-family: var(--font-display); font-size: 90px; font-weight: 700; color: var(--accent);
+}
+.avatar::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 64px;
+  background: linear-gradient(to bottom, rgba(34,211,238,.25), transparent);
+  animation: scan 5s linear infinite;
+}
+.avatar-badge {
+  position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 2;
+  display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.15em; background: rgba(4,6,12,.7); border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 12px; color: var(--muted);
+}
+.avatar-badge b { color: var(--accent-3); }
+.about-text p { color: var(--muted); margin-bottom: 16px; }
+.about-text p strong { color: var(--txt); font-weight: 600; }
+.chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 22px 0 30px; }
+.chips span { border: 1px solid var(--line); background: var(--surface-2); border-radius: 10px; padding: 8px 14px; font-size: 12px; color: var(--muted); }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.stat {
+  border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 18px; transition: transform 0.4s, border-color 0.3s;
+}
+.stat:hover { transform: translateY(-5px); border-color: var(--accent); }
+.stat b { font-family: var(--font-display); font-size: 28px; }
+.stat p { font-size: 14px; font-weight: 600; margin-top: 2px; }
+.stat small { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+/* ===== 9. SKILLS ===== */
+.filters { margin: 30px 0 26px; display: flex; gap: 8px; flex-wrap: wrap; }
+.filters button {
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
+  font-family: var(--font-mono); font-size: 12px; padding: 8px 16px; border-radius: 10px; cursor: pointer;
+}
+.filters button.on { color: var(--accent); border-color: var(--accent); background: rgba(34,211,238,.1); }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; list-style: none; }
+.card {
+  border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 20px; transition: transform 0.4s, border-color 0.3s;
+}
+.card:hover { transform: translateY(-6px); border-color: var(--accent); }
+.card-top { display: flex; gap: 14px; align-items: center; }
+.card-icon {
+  width: 44px; height: 44px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 12px;
+  display: grid; place-items: center; background: var(--surface-2); font-size: 20px;
+}
+.card h3 { font-size: 15px; }
+.card-top small { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+.card > p { font-size: 13px; color: var(--muted); margin-top: 14px; }
+.card-foot {
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+}
+.level { display: flex; gap: 4px; }
+.level i { height: 6px; border-radius: 4px; background: var(--line); }
+.level i.fill { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.level i.wide { width: 22px; } .level i.thin { width: 10px; }
+/* ===== 10. PROJECTS ===== */
+.projects { margin-top: 44px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.project {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 18px; overflow: hidden;
+  transition: transform 0.4s, border-color 0.3s;
+}
+.project:hover { transform: translateY(-6px); border-color: var(--accent); }
+.p-thumb { aspect-ratio: 16/9; display: grid; place-items: center; font-size: 56px; position: relative; }
+.p-thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--surface), transparent 55%); }
+.thumb-1 { background: linear-gradient(135deg, #062a33, #0a1120 60%, #131a2e); }
+.thumb-2 { background: linear-gradient(135deg, #1c1440, #0a1120 60%, #0b1a33); }
+.thumb-3 { background: linear-gradient(135deg, #052e22, #0a1120 60%, #12233d); }
+.thumb-4 { background: linear-gradient(135deg, #0e2a3d, #0a1120 60%, #241a3d); }
+.p-status {
+  position: absolute; z-index: 2; top: 12px; left: 12px; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+  border: 1px solid var(--accent); background: rgba(4,6,12,.7); border-radius: 8px; padding: 5px 10px;
+}
+.p-body { padding: 22px; }
+.p-body h3 { font-size: 18px; }
+.p-body > p { font-size: 13.5px; color: var(--muted); margin-top: 10px; }
+.tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.tags span {
+  font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+  border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 4px 11px;
+}
+.p-body .btn { margin-top: 18px; font-size: 13px; padding: 10px 18px; cursor: pointer; }
+/* ===== 11. MODAL ===== */
+.modal-bg {
+  position: fixed; inset: 0; z-index: 90; background: rgba(4,6,12,.8);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  max-width: 620px; width: 100%; max-height: 88vh; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+}
+.modal-head { padding: 24px 24px 0; }
+.modal-head small { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
+.modal-head h3 { font-size: 24px; margin-top: 4px; }
+.modal-body { padding: 16px 24px 26px; font-size: 14px; color: var(--muted); }
+.modal-body ul { margin: 12px 0 0 18px; }
+.modal-body li { margin-bottom: 8px; }
+.modal-close { float: right; }
+/* ===== 12. TECH LAB ===== */
+.lab { margin-top: 40px; border: 1px solid var(--line); background: var(--surface); border-radius: 22px; overflow: hidden; }
+.lab-bar {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--line); background: var(--surface-2); padding: 14px 20px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+}
+.lab-bar .on { color: var(--accent-3); }
+.lab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; list-style: none; }
+.tech {
+  border: 1px solid var(--line); background: var(--bg-soft); border-radius: 14px; padding: 16px;
+  transition: transform 0.4s, border-color 0.3s;
+}
+.tech:hover { transform: translateY(-4px); border-color: var(--accent); }
+.tech-top { display: flex; gap: 12px; align-items: center; }
+.tech-top .card-icon { width: 38px; height: 38px; font-size: 17px; }
+.tech-top div { flex: 1; min-width: 0; }
+.tech-top h3 { font-size: 14px; }
+.tech-top small { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.tech-pct { font-family: var(--font-mono); font-size: 14px; color: var(--accent); }
+.bar { position: relative; height: 6px; background: var(--line); border-radius: 6px; margin-top: 14px; overflow: hidden; }
+.bar i {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 6px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 12px -2px var(--accent);
+  transition: width 1.2s ease-out;
+}
+/* ===== 13. TIMELINE ===== */
+.timeline { margin-top: 44px; list-style: none; border-left: 1px solid var(--line); padding-left: 34px; display: grid; gap: 22px; }
+.timeline li { position: relative; border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 22px; }
+.timeline li::before {
+  content: ""; position: absolute; left: -41px; top: 30px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--accent);
+}
+.timeline small { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
+.timeline h3 { font-size: 18px; margin-top: 6px; }
+.timeline .role { font-size: 14px; color: var(--muted); }
+.period {
+  display: inline-block; margin-top: 10px; font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+  border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 5px 12px;
+}
+.timeline ul { margin: 14px 0 0 4px; list-style: none; }
+.timeline ul li { border: none; background: none; padding: 0 0 0 20px; margin-bottom: 8px; font-size: 13.5px; color: var(--muted); position: relative; }
+.timeline ul li::before { content: "→"; left: 0; top: 0; width: auto; height: auto; background: none; border: none; color: var(--accent); font-size: 12px; }
+/* ===== 14. EDUCATION & INTERESTS ===== */
+.edu-grid { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.edu { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 24px; transition: transform 0.4s, border-color 0.3s; }
+.edu:hover { transform: translateY(-5px); border-color: var(--accent); }
+.edu h3 { font-size: 18px; margin-top: 14px; }
+.edu .prog { color: var(--accent); font-size: 14px; }
+.edu p { font-size: 13.5px; color: var(--muted); margin-top: 10px; }
+.interests { margin-top: 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; list-style: none; }
+.interests li {
+  border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 22px 14px; text-align: center; transition: transform 0.4s, border-color 0.3s;
+}
+.interests li:hover { transform: translateY(-5px); border-color: var(--accent); }
+.interests .emoji { font-size: 30px; }
+.interests h3 { font-size: 13.5px; margin-top: 10px; }
+.interests p { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+/* ===== 15. CONTACT ===== */
+.contact-grid { margin-top: 44px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; align-items: start; }
+form {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 22px; padding: 26px;
+  display: grid; gap: 16px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+label { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+input, textarea {
+  width: 100%; border: 1px solid var(--line); background: var(--bg-soft); color: var(--txt);
+  border-radius: 12px; padding: 12px 14px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.3s, box-shadow 0.3s;
+}
+input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34,211,238,.15); }
+textarea { resize: vertical; min-height: 120px; }
+.error { font-size: 12px; color: #f87171; margin-top: 6px; min-height: 16px; }
+.form-ok { display: none; font-family: var(--font-mono); font-size: 12px; color: var(--accent-3); }
+.form-ok.show { display: inline; }
+.info { border: 1px solid var(--line); background: var(--surface); border-radius: 22px; padding: 24px; }
+.info h3, .socials-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+.info ul { list-style: none; margin-top: 16px; display: grid; gap: 12px; font-size: 14px; color: var(--muted); }
+.status-box {
+  margin-top: 18px; display: flex; gap: 10px; align-items: center;
+  border: 1px solid var(--accent-3); background: rgba(52,211,153,.08); color: var(--accent-3);
+  border-radius: 12px; padding: 10px 14px; font-family: var(--font-mono); font-size: 11px;
+}
+.socials { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.socials a {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 14px;
+  text-decoration: none; transition: transform 0.3s, border-color 0.3s; display: block;
+}
+.socials a:hover { transform: translateY(-4px); border-color: var(--accent); }
+.socials b { font-size: 13px; display: block; }
+.socials small { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+/* ===== 16. FOOTER & BACK TO TOP ===== */
+footer { border-top: 1px solid var(--line); background: var(--bg-soft); padding: 48px 0 28px; margin-top: 40px; }
+.foot-grid { display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 32px; }
+.foot-grid p { font-size: 13.5px; color: var(--muted); margin-top: 12px; }
+.foot-grid nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: start; }
+.foot-grid nav a { font-size: 14px; color: var(--muted); text-decoration: none; }
+.foot-grid nav a:hover { color: var(--accent); }
+.foot-bottom {
+  margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  font-size: 13px; color: var(--muted);
+}
+#toTop {
+  position: fixed; right: 20px; bottom: 20px; z-index: 60; width: 48px; height: 48px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--surface); color: var(--txt); font-size: 18px; cursor: pointer;
+  opacity: 0; transform: translateY(16px); pointer-events: none; transition: 0.4s;
+}
+#toTop.show { opacity: 1; transform: none; pointer-events: auto; }
+#toTop:hover { border-color: var(--accent); color: var(--accent); }
+/* ===== 17. SCROLL-REVEAL ===== */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+/* ===== 18. KEYFRAMES ===== */
+@keyframes spark-fall {
+  0% { transform: translateY(-6vh); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(104vh); opacity: 0; }
+}
+@keyframes zap {
+  0%, 84%, 100% { opacity: 0; }
+  86%, 90% { opacity: 1; }
+  88%, 94% { opacity: 0.15; }
+}
+@keyframes pulse-node { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+@keyframes blink { 50% { opacity: 0.2; } }
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { transform: translateY(1100%); opacity: 0; }
+}
+/* ===== 19. RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .cards { grid-template-columns: 1fr 1fr; }
+  .interests { grid-template-columns: repeat(3, 1fr); }
+  .about-grid, .contact-grid, .foot-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  section { padding: 64px 0; }
+  .nav-links, .btn-nav { display: none; }
+  .hamburger { display: grid; place-items: center; }
+  .mobile-menu { display: block; overflow: hidden; max-height: 0; transition: max-height 0.45s ease; }
+  .mobile-menu.open { max-height: 420px; }
+  .mobile-menu a {
+    display: block; text-decoration: none; color: var(--muted); font-size: 14px;
+    padding: 13px 20px; border-top: 1px solid var(--line);
+  }
+  .mobile-menu a.active { color: var(--accent); }
+  .projects, .lab-grid, .edu-grid, .form-row { grid-template-columns: 1fr; }
+  .cards, .interests, .socials, .stats { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+}
+  </style>
+</head>
+<body>
+
+  <!-- ===== EFEK LISTRIK PINGGIR (kiri & kanan) ===== -->
+  <div class="edge edge-left" aria-hidden="true">
+    <span class="rail"></span>
+    <span class="node" style="top:14%"></span>
+    <span class="node" style="top:38%; animation-delay:.7s"></span>
+    <span class="node" style="top:62%; animation-delay:1.4s"></span>
+    <span class="node" style="top:88%; animation-delay:2.1s"></span>
+    <span class="spark" style="width:3px;height:3px;animation-delay:0s"></span>
+    <span class="spark" style="width:2px;height:2px;animation-delay:1.9s;animation-duration:9s"></span>
+    <span class="spark" style="width:2px;height:2px;animation-delay:3.4s;animation-duration:6s"></span>
+    <span class="bolt" style="top:27%;animation-delay:1.6s">⚡</span>
+    <span class="bolt" style="top:68%;animation-delay:.9s">⚡</span>
+  </div>
+  <div class="edge edge-right" aria-hidden="true">
+    <span class="rail"></span>
+    <span class="node" style="top:20%"></span>
+    <span class="node" style="top:55%; animation-delay:1s"></span>
+    <span class="node" style="top:80%; animation-delay:1.8s"></span>
+    <span class="spark" style="width:3px;height:3px;animation-delay:2.6s;animation-duration:8s"></span>
+    <span class="spark" style="width:2px;height:2px;animation-delay:4.5s"></span>
+    <span class="bolt" style="top:46%;animation-delay:3.1s">⚡</span>
+    <span class="bolt" style="top:86%;animation-delay:2.4s">⚡</span>
+  </div>
+
+  <!-- ===== NAVBAR ===== -->
+  <header id="header">
+    <div class="container nav">
+      <a href="#home" class="logo"><span class="logo-badge">⚡</span><span>IZUL HAQ</span></a>
+      <nav>
+        <ul class="nav-links">
+          <li><a data-nav href="#home">Home</a></li>
+          <li><a data-nav href="#about">About</a></li>
+          <li><a data-nav href="#skills">Skills</a></li>
+          <li><a data-nav href="#projects">Projects</a></li>
+          <li><a data-nav href="#experience">Experience</a></li>
+          <li><a data-nav href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <button class="icon-btn" id="themeBtn" aria-label="Ganti tema gelap/terang">☀️</button>
+        <a href="#contact" class="btn btn-ghost btn-nav">Hire / Collab</a>
+        <button class="icon-btn hamburger" id="hamburger" aria-label="Buka menu">☰</button>
+      </div>
+    </div>
+    <div class="progress"><span id="progress"></span></div>
+    <nav class="mobile-menu container" id="mobileMenu">
+      <a data-nav href="#home">Home</a>
+      <a data-nav href="#about">About</a>
+      <a data-nav href="#skills">Skills</a>
+      <a data-nav href="#projects">Projects</a>
+      <a data-nav href="#experience">Experience</a>
+      <a data-nav href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="home">
+      <div class="container">
+        <span class="pill"><span class="dot"></span> Open for collaboration</span>
+        <p class="hero-hello">Hello, I'm</p>
+        <h1><span class="text-gradient">IZUL HAQ</span> NUR KHOLILI</h1>
+        <div class="hero-role">
+          <strong>Electrical Engineering Student</strong>
+          <span class="ticker" id="ticker">Internet of Things</span>
+        </div>
+        <p class="hero-desc">Mahasiswa Teknik Elektro yang tertarik pada Internet of Things, elektronika, pemrograman, robotika, dan pengembangan teknologi.</p>
+        <div class="hero-cta">
+          <a href="#projects" class="btn btn-primary">Explore My Projects →</a>
+          <a href="#contact" class="btn btn-ghost">✉ Contact Me</a>
+        </div>
+        <svg class="signal" viewBox="0 0 600 24" aria-hidden="true">
+          <path d="M0 12h150l14-8h40l14 16h40l14-16h40l14 8h234" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.3"/>
+          <path d="M0 12h150l14-8h40l14 16h40l14-16h40l14 8h234" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="18 240">
+            <animate attributeName="stroke-dashoffset" from="0" to="-258" dur="2.4s" repeatCount="indefinite"/>
+          </path>
+        </svg>
+        <div class="hero-meta">
+          <span>🎓 Universitas Jember</span>
+          <span>📍 Jember, Jawa Timur</span>
+          <span>📡 IoT · Electronics · Robotics</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section id="about">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">01 · About Me</p>
+          <h2 class="section-title">Belajar, bereksperimen, dan <span class="text-gradient">membangun teknologi</span></h2>
+        </div>
+        <div class="about-grid">
+          <div class="reveal">
+            <div class="photo-frame">
+              <div class="avatar">IH
+                <div class="avatar-badge"><span>UNIVERSITAS JEMBER</span><b>● ACTIVE</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="reveal">
+            <div class="about-text">
+              <p>Saya adalah mahasiswa Teknik Elektro yang memiliki ketertarikan pada perkembangan teknologi, khususnya <strong>Internet of Things, elektronika,</strong> <strong>pemrograman, robotika,</strong> dan <strong>sistem kontrol</strong>.</p>
+              <p>Saya terus mengembangkan kemampuan melalui pembelajaran, project, praktikum, dan kegiatan organisasi. Setiap rangkaian yang saya rakit dan setiap baris kode yang saya tulis adalah langkah kecil untuk memahami bagaimana teknologi bekerja.</p>
+            </div>
+            <div class="chips"><span>🔌 Microcontroller</span><span>📡 IoT Systems</span><span>🤖 Robotics</span><span>⚡ Electronics</span></div>
+            <div class="stats">
+              <div class="stat"><b class="text-gradient">2025</b><p>University Journey</p><small>Angkatan pertama di kampus</small></div>
+              <div class="stat"><b class="text-gradient">5+</b><p>Projects</p><small>Project &amp; eksperimen elektronika</small></div>
+              <div class="stat"><b class="text-gradient">3+</b><p>Technology Fields</p><small>IoT · Robotics · Embedded</small></div>
+              <div class="stat"><b class="text-gradient">100%</b><p>Learning &amp; Growing</p><small>Selalu belajar hal baru</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SKILLS ===== -->
+    <section id="skills">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">02 · Technical Skills</p>
+          <h2 class="section-title">Alat dan bahasa yang saya <span class="text-gradient">pelajari &amp; gunakan</span></h2>
+          <p class="section-desc">Masih dalam proses belajar — setiap skill di bawah ini saya kembangkan lewat praktikum, project kecil, dan eksperimen mandiri.</p>
+        </div>
+        <div class="filters reveal">
+          <button class="on" data-filter="All">All</button>
+          <button data-filter="Hardware">Hardware</button>
+          <button data-filter="Electronics">Electronics</button>
+          <button data-filter="Software">Software</button>
+          <button data-filter="Systems">Systems</button>
+        </div>
+        <ul class="cards" id="skillGrid">
+          <li class="card reveal" data-cat="Systems"><div class="card-top"><span class="card-icon">📡</span><div><h3>Internet of Things</h3><small>Systems</small></div></div><p>Menghubungkan sensor ke cloud &amp; dashboard monitoring.</p><div class="card-foot"><span>Practicing</span><span class="level"><i class="wide fill"></i><i class="wide fill"></i><i class="wide fill"></i></span></div></li>
+          <li class="card reveal" data-cat="Hardware"><div class="card-top"><span class="card-icon">🔌</span><div><h3>Arduino</h3><small>Hardware</small></div></div><p>Prototyping cepat untuk project kuliah dan eksperimen.</p><div class="card-foot"><span>Practicing</span><span class="level"><i class="wide fill"></i><i class="wide fill"></i><i class="wide fill"></i></span></div></li>
+          <li class="card reveal" data-cat="Hardware"><div class="card-top"><span class="card-icon">💾</span><div><h3>Microcontroller</h3><small>Hardware</small></div></div><p>ESP32 &amp; AVR: GPIO, PWM, ADC, komunikasi serial.</p><div class="card-foot"><span>Practicing</span><span class="level"><i class="wide fill"></i><i class="wide fill"></i><i class="wide fill"></i></span></div></li>
+          <li class="card reveal" data-cat="Electronics"><div class="card-top"><span class="card-icon">⚡</span><div><h3>Basic Electronics</h3><small>Electronics</small></div></div><p>Hukum Ohm, rangkaian RLC, pembagi tegangan, dioda.</p><div class="card-foot"><span>Practicing</span><span class="level"><i class="wide fill"></i><i class="wide fill"></i><i class="wide fill"></i></span></div></li>
+          <li class="card reveal" data-cat="Software"><div class="card-top"><span class="card-icon">💻</span><div><h3>C / C++</h3><small>Software</small></div></div><p>Bahasa utama untuk memprogram embedded device.</p><div class="card-foot"><span>Practicing</span><span class="level"><i class="wide fill"></i><i class="wide fill"></i><i class="wide fill"></i></span></div></li>
+          <li class="card reveal" data-cat="Software"><div class="card-top"><span class="card-icon">🐍</span><div><h3>Python</h3><small>Software</small></div></div><p>Scripting, olah data sensor, dan otomasi sederhana.</p><div class="card-foot"><span>Familiar</span><span class="level"><i class="wide fill"></i><i class="wide fill"></i><i class="thin"></i></span></div></li>
+          <li class="card reveal" data-cat="Software"><div class="card-top"><span class="card-icon">🎨</span><div><h3>HTML &amp; CSS</h3><small>Software</small></div></div><p>Membangun antarmuka dashboard perangkat IoT.</p><div class="card-foot"><span>Familiar</span><span class="level"><i class="wide fill"></i><i class="wide fill"></i><i class="thin"></i></span></div></li>
+          <li class="card reveal" data-cat="Software"><div class="card-top"><span class="card-icon">📜</span><div><h3>JavaScript</h3><small>Software</small></div></div><p>Interaktivitas web &amp; komunikasi data realtime.</p><div class="card-foot"><span>Learning</span><span class="level"><i class="wide fill"></i><i class="thin"></i><i class="thin"></i></span></div></li>
+          <li class="card reveal" data-cat="Electronics"><div class="card-top"><span class="card-icon">🔬</span><div><h3>Circuit Design</h3><small>Electronics</small></div></div><p>Skematik dan layout PCB sederhana.</p><div class="card-foot"><span>Learning</span><span class="level"><i class="wide fill"></i><i class="thin"></i><i class="thin"></i></span></div></li>
+          <li class="card reveal" data-cat="Systems"><div class="card-top"><span class="card-icon">🤖</span><div><h3>Basic Robotics</h3><small>Systems</small></div></div><p>Kontrol motor, aktuator, dan logika gerak robot.</p><div class="card-foot"><span>Learning</span><span class="level"><i class="wide fill"></i><i class="thin"></i><i class="thin"></i></span></div></li>
+          <li class="card reveal" data-cat="Electronics"><div class="card-top"><span class="card-icon">📟</span><div><h3>Sensors &amp; Actuators</h3><small>Electronics</small></div></div><p>DHT, ultrasonic, LDR, relay, servo, motor DC.</p><div class="card-foot"><span>Practicing</span><span class="level"><i class="wide fill"></i><i class="wide fill"></i><i class="wide fill"></i></span></div></li>
+          <li class="card reveal" data-cat="Software"><div class="card-top"><span class="card-icon">🗄️</span><div><h3>Database</h3><small>Software</small></div></div><p>Menyimpan &amp; membaca data logging perangkat.</p><div class="card-foot"><span>Learning</span><span class="level"><i class="wide fill"></i><i class="thin"></i><i class="thin"></i></span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== PROJECTS ===== -->
+    <section id="projects">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">03 · Featured Projects</p>
+          <h2 class="section-title">Project &amp; eksperimen yang <span class="text-gradient">saya kerjakan</span></h2>
+          <p class="section-desc">Kumpulan project belajar di bidang IoT, robotika, dan elektronika dasar — dibuat untuk memahami teori lewat praktik langsung.</p>
+        </div>
+        <div class="projects">
+          <article class="project reveal">
+            <div class="p-thumb thumb-1">📡<span class="p-status">Prototype</span></div>
+            <div class="p-body"><h3>Smart IoT System</h3><p>Sistem berbasis Internet of Things untuk monitoring perangkat atau lingkungan secara real-time.</p><div class="tags"><span>Arduino</span><span>ESP32</span><span>Sensor</span><span>IoT</span></div><button class="btn btn-ghost" data-project="iot">View Project →</button></div>
+          </article>
+          <article class="project reveal">
+            <div class="p-thumb thumb-2">🏠<span class="p-status">Concept</span></div>
+            <div class="p-body"><h3>Smart Home</h3><p>Konsep rumah pintar yang menggunakan sensor dan microcontroller untuk mengontrol perangkat elektronik.</p><div class="tags"><span>ESP32</span><span>Sensor</span><span>Relay</span><span>IoT</span></div><button class="btn btn-ghost" data-project="home">View Project →</button></div>
+          </article>
+          <article class="project reveal">
+            <div class="p-thumb thumb-3">🤖<span class="p-status">Experiment</span></div>
+            <div class="p-body"><h3>Mini Robot</h3><p>Project robot sederhana yang dapat bergerak dan merespons input sensor.</p><div class="tags"><span>Arduino</span><span>Motor</span><span>Sensor</span><span>C/C++</span></div><button class="btn btn-ghost" data-project="robot">View Project →</button></div>
+          </article>
+          <article class="project reveal">
+            <div class="p-thumb thumb-4">🔌<span class="p-status">Lab Work</span></div>
+            <div class="p-body"><h3>Electronic Circuit Project</h3><p>Project perancangan rangkaian elektronika sederhana untuk memahami prinsip kerja komponen elektronik.</p><div class="tags"><span>Resistor</span><span>Capacitor</span><span>LED</span><span>Transistor</span></div><button class="btn btn-ghost" data-project="circuit">View Project →</button></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TECH LAB (bar persentase pemahaman) ===== -->
+    <section id="technology">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">04 · Technology I'm Exploring</p>
+          <h2 class="section-title">Laboratorium kecil untuk <span class="text-gradient">bereksperimen</span></h2>
+          <p class="section-desc">Perangkat, platform, dan bahasa yang sedang saya dalami. Bar menunjukkan persentase pemahaman.</p>
+        </div>
+        <div class="lab reveal">
+          <div class="lab-bar"><span>◉ ◉ ◉ &nbsp;tech_lab / monitor.sh</span><span><span class="on">● system active</span> &nbsp; avg: 39%</span></div>
+          <ul class="lab-grid">
+            <li class="tech"><div class="tech-top"><span class="card-icon">💾</span><div><h3>ESP32</h3><small>WiFi + BLE MCU</small></div><span class="tech-pct">45%</span></div><div class="bar" data-level="45"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">🔌</span><div><h3>Arduino</h3><small>Rapid prototyping</small></div><span class="tech-pct">55%</span></div><div class="bar" data-level="55"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">🖥️</span><div><h3>Raspberry Pi</h3><small>Single board computer</small></div><span class="tech-pct">25%</span></div><div class="bar" data-level="25"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">📟</span><div><h3>Sensors</h3><small>Data acquisition</small></div><span class="tech-pct">50%</span></div><div class="bar" data-level="50"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">⚙️</span><div><h3>Microcontrollers</h3><small>Embedded control</small></div><span class="tech-pct">45%</span></div><div class="bar" data-level="45"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">📡</span><div><h3>IoT</h3><small>Connected devices</small></div><span class="tech-pct">40%</span></div><div class="bar" data-level="40"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">🤖</span><div><h3>Robotics</h3><small>Motion &amp; actuators</small></div><span class="tech-pct">20%</span></div><div class="bar" data-level="20"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">🔬</span><div><h3>Embedded Systems</h3><small>Firmware level</small></div><span class="tech-pct">30%</span></div><div class="bar" data-level="30"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">🐍</span><div><h3>Python</h3><small>Data &amp; scripting</small></div><span class="tech-pct">35%</span></div><div class="bar" data-level="35"><i></i></div></li>
+            <li class="tech"><div class="tech-top"><span class="card-icon">💻</span><div><h3>C/C++</h3><small>Low level logic</small></div><span class="tech-pct">40%</span></div><div class="bar" data-level="40"><i></i></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== EXPERIENCE ===== -->
+    <section id="experience">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">05 · Experience &amp; Organization</p>
+          <h2 class="section-title">Perjalanan belajar dan <span class="text-gradient">berorganisasi</span></h2>
+          <p class="section-desc">Selain kuliah, saya aktif di organisasi untuk melatih kerja sama tim, komunikasi, dan tanggung jawab.</p>
+        </div>
+        <ol class="timeline">
+          <li class="reveal"><small>Education</small><h3>Universitas Jember</h3><p class="role">Mahasiswa Teknik Elektro</p><span class="period">2025 — Sekarang</span>
+            <ul><li>Mempelajari dasar rangkaian listrik, elektronika, dan sistem kontrol melalui kuliah dan praktikum.</li><li>Mengerjakan tugas project berbasis microcontroller bersama tim kecil.</li><li>Terbiasa menyusun laporan teknis dan mempresentasikan hasil percobaan.</li></ul>
+          </li>
+          <li class="reveal"><small>Organization</small><h3>HIMASIF / Student Organization</h3><p class="role">Anggota Aktif</p><span class="period">2025 — Sekarang</span>
+            <ul><li>Terlibat dalam kepanitiaan kegiatan kampus dan koordinasi antar divisi.</li><li>Melatih komunikasi, kerja sama tim, dan manajemen waktu di sela perkuliahan.</li><li>Ikut membantu dokumentasi serta publikasi kegiatan organisasi.</li></ul>
+          </li>
+          <li class="reveal"><small>Organization</small><h3>Mapala Balwana</h3><p class="role">Anggota</p><span class="period">2026 — Sekarang</span>
+            <ul><li>Kegiatan luar ruang yang melatih kedisiplinan, ketahanan fisik, dan kerja tim.</li><li>Belajar manajemen perjalanan, navigasi, dan prosedur keselamatan.</li><li>Menumbuhkan kepedulian terhadap lingkungan dan alam sekitar.</li></ul>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== EDUCATION ===== -->
+    <section id="education" style="padding-top:0">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">06 · Education</p>
+          <h2 class="section-title">Pendidikan <span class="text-gradient">formal</span></h2>
+        </div>
+        <div class="edu-grid">
+          <article class="edu reveal"><span class="card-icon">🎓</span><h3>Universitas Jember</h3><p class="prog">S1 Teknik Elektro</p><p>Fokus pada elektronika, sistem kontrol, dan sistem tertanam berbasis IoT.</p><span class="period">2025 — Sekarang</span></article>
+          <article class="edu reveal"><span class="card-icon">📚</span><h3>SMA Negeri Pakusari</h3><p class="prog">Ilmu Pengetahuan Alam</p><p>Dasar fisika dan matematika yang menumbuhkan minat pada dunia teknik.</p><span class="period">2022 — 2025</span></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== INTERESTS ===== -->
+    <section id="interests" style="padding-top:0">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">07 · What I'm Interested In</p>
+          <h2 class="section-title">Bidang yang membuat saya <span class="text-gradient">penasaran</span></h2>
+          <p class="section-desc">Topik-topik yang saya ikuti, pelajari, dan ingin dalami lebih jauh ke depannya.</p>
+        </div>
+        <ul class="interests">
+          <li class="reveal"><span class="emoji">⚡</span><h3>Electrical Engineering</h3><p>Rangkaian, daya, dan pengukuran listrik.</p></li>
+          <li class="reveal"><span class="emoji">🤖</span><h3>Robotics</h3><p>Robot bergerak dan kontrol aktuator.</p></li>
+          <li class="reveal"><span class="emoji">📡</span><h3>Internet of Things</h3><p>Perangkat terhubung &amp; monitoring jarak jauh.</p></li>
+          <li class="reveal"><span class="emoji">💻</span><h3>Programming</h3><p>C/C++, Python, dan web dasar.</p></li>
+          <li class="reveal"><span class="emoji">🔧</span><h3>Electronics</h3><p>Komponen, solder, dan prototyping.</p></li>
+          <li class="reveal"><span class="emoji">🧠</span><h3>Embedded Systems</h3><p>Firmware untuk microcontroller.</p></li>
+          <li class="reveal"><span class="emoji">🎛️</span><h3>Control Systems</h3><p>Sistem loop tertutup &amp; tuning respons.</p></li>
+          <li class="reveal"><span class="emoji">🌐</span><h3>Smart Technology</h3><p>Otomasi cerdas untuk kehidupan harian.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact">
+      <div class="container">
+        <div class="reveal">
+          <p class="eyebrow">08 · Let's Connect</p>
+          <h2 class="section-title">Interested in technology, electronics, or IoT? <span class="text-gradient">Let's build something together.</span></h2>
+          <p class="section-desc">Terbuka untuk diskusi project, kolaborasi tugas, atau sekadar berbagi ide tentang dunia elektro dan teknologi.</p>
+        </div>
+        <div class="contact-grid">
+          <form id="contactForm" class="reveal" novalidate>
+            <div class="form-row">
+              <div><label for="fName">Name</label><input id="fName" type="text" placeholder="Nama kamu" autocomplete="name" /><p class="error" id="errName"></p></div>
+              <div><label for="fEmail">Email</label><input id="fEmail" type="email" placeholder="nama@email.com" autocomplete="email" /><p class="error" id="errEmail"></p></div>
+            </div>
+            <div><label for="fMessage">Message</label><textarea id="fMessage" placeholder="Ceritakan ide, project, atau pertanyaan kamu..."></textarea><p class="error" id="errMessage"></p></div>
+            <div><button type="submit" class="btn btn-primary" id="sendBtn">Send Message ✈</button> <span class="form-ok" id="formOk">✓ Pesan terkirim. Terima kasih!</span></div>
+          </form>
+          <div class="reveal">
+            <div class="info">
+              <h3>Contact info</h3>
+              <ul><li>📍 Jember, Jawa Timur</li><li>🎓 Universitas Jember</li><li>✉️ izulhaq@example.com</li></ul>
+              <div class="status-box"><span class="dot"></span> STATUS: tersedia untuk kolaborasi project</div>
+            </div>
+            <p class="socials-title" style="margin-top:18px">Socials</p>
+            <div class="socials">
+              <a href="https://github.com/" target="_blank" rel="noreferrer"><b>GitHub</b><small>@izulhaq</small></a>
+              <a href="https://instagram.com/" target="_blank" rel="noreferrer"><b>Instagram</b><small>@izulhaq</small></a>
+              <a href="https://linkedin.com/" target="_blank" rel="noreferrer"><b>LinkedIn</b><small>Izul Haq N. K.</small></a>
+              <a href="mailto:izulhaq@example.com"><b>Email</b><small>izulhaq@example.com</small></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="foot-grid">
+        <div>
+          <a href="#home" class="logo"><span class="logo-badge">⚡</span><span>IZUL HAQ</span></a>
+          <p>Portfolio pribadi seorang mahasiswa Teknik Elektro yang sedang belajar, bereksperimen, dan membangun project teknologi.</p>
+        </div>
+        <nav>
+          <a href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a>
+          <a href="#projects">Projects</a><a href="#experience">Experience</a><a href="#contact">Contact</a>
+        </nav>
+        <div><p class="socials-title">Connect</p><p>GitHub · Instagram · LinkedIn · Email</p></div>
+      </div>
+      <div class="foot-bottom">
+        <span>© <span id="year">2026</span> Izul Haq Nur Kholili</span>
+        <span>Electrical Engineering Student</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== MODAL PROJECT ===== -->
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <div class="modal-head">
+        <button class="icon-btn modal-close" id="modalClose" aria-label="Tutup">✕</button>
+        <small id="modalStatus">Prototype</small>
+        <h3 id="modalTitle">Project</h3>
+      </div>
+      <div class="modal-body">
+        <p id="modalBody"></p>
+        <ul id="modalPoints"></ul>
+      </div>
+    </div>
+  </div>
+
+  <button id="toTop" aria-label="Kembali ke atas">↑</button>
+
+  <script>
+/* ===== 1. TAHUN OTOMATIS ===== */
+document.getElementById("year").textContent = new Date().getFullYear();
+
+/* ===== 2. DARK / LIGHT MODE (tersimpan di localStorage) ===== */
+var root = document.documentElement;
+var themeBtn = document.getElementById("themeBtn");
+if (localStorage.getItem("portfolio-theme") === "light") {
+  root.setAttribute("data-theme", "light");
+}
+function syncThemeIcon() {
+  themeBtn.textContent = root.getAttribute("data-theme") === "light" ? "🌙" : "☀️";
+}
+syncThemeIcon();
+themeBtn.addEventListener("click", function () {
+  if (root.getAttribute("data-theme") === "light") {
+    root.removeAttribute("data-theme");
+    localStorage.setItem("portfolio-theme", "dark");
+  } else {
+    root.setAttribute("data-theme", "light");
+    localStorage.setItem("portfolio-theme", "light");
+  }
+  syncThemeIcon();
+});
+
+/* ===== 3. MENU HP ===== */
+var hamburger = document.getElementById("hamburger");
+var mobileMenu = document.getElementById("mobileMenu");
+hamburger.addEventListener("click", function () {
+  var open = mobileMenu.classList.toggle("open");
+  hamburger.textContent = open ? "✕" : "☰";
+});
+mobileMenu.querySelectorAll("a").forEach(function (link) {
+  link.addEventListener("click", function () {
+    mobileMenu.classList.remove("open");
+    hamburger.textContent = "☰";
+  });
+});
+
+/* ===== 4. EFEK SCROLL: navbar, progress, tombol atas, menu aktif ===== */
+var header = document.getElementById("header");
+var progress = document.getElementById("progress");
+var toTop = document.getElementById("toTop");
+var sectionIds = ["home", "about", "skills", "projects", "experience", "contact"];
+var navAnchors = document.querySelectorAll("[data-nav]");
+function onScroll() {
+  var y = window.scrollY;
+  var max = document.body.scrollHeight - window.innerHeight;
+  progress.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
+  header.classList.toggle("scrolled", y > 24);
+  toTop.classList.toggle("show", y > 600);
+  var current = sectionIds[0];
+  sectionIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top - 140 <= 0) current = id;
+  });
+  if (window.innerHeight + y >= document.body.scrollHeight - 4) {
+    current = sectionIds[sectionIds.length - 1];
+  }
+  navAnchors.forEach(function (a) {
+    a.classList.toggle("active", a.getAttribute("href") === "#" + current);
+  });
+}
+window.addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+toTop.addEventListener("click", function () {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+/* ===== 5. TEKS BERPUTAR DI HERO ===== */
+var words = ["Internet of Things", "Embedded Systems", "Robotics", "Circuit Design"];
+var ticker = document.getElementById("ticker");
+var wordIndex = 0;
+setInterval(function () {
+  wordIndex = (wordIndex + 1) % words.length;
+  ticker.textContent = words[wordIndex];
+}, 2600);
+
+/* ===== 6. MUNCUL SAAT SCROLL ===== */
+var revealObserver = new IntersectionObserver(function (entries) {
+  entries.forEach(function (entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("visible");
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll(".reveal").forEach(function (el) {
+  revealObserver.observe(el);
+});
+
+/* ===== 7. FILTER SKILLS ===== */
+var filterBtns = document.querySelectorAll(".filters button");
+var skillCards = document.querySelectorAll("#skillGrid .card");
+filterBtns.forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    filterBtns.forEach(function (b) { b.classList.remove("on"); });
+    btn.classList.add("on");
+    var cat = btn.getAttribute("data-filter");
+    skillCards.forEach(function (card) {
+      card.style.display = (cat === "All" || card.getAttribute("data-cat") === cat) ? "" : "none";
+    });
+  });
+});
+
+/* ===== 8. BAR PERSENTASE (data-level="45" → lebar 45%) ===== */
+var barObserver = new IntersectionObserver(function (entries) {
+  entries.forEach(function (entry) {
+    if (entry.isIntersecting) {
+      var bar = entry.target;
+      bar.querySelector("i").style.width = bar.getAttribute("data-level") + "%";
+      barObserver.unobserve(bar);
+    }
+  });
+}, { threshold: 0.4 });
+document.querySelectorAll(".bar").forEach(function (bar) {
+  barObserver.observe(bar);
+});
+
+/* ===== 9. MODAL PROJECT ===== */
+var projectData = {
+  iot: {
+    status: "Prototype",
+    title: "Smart IoT System",
+    body: "Node sensor membaca data suhu, kelembapan, dan status perangkat, lalu mengirimkannya melalui WiFi ke dashboard. Data ditampilkan dalam bentuk grafik sederhana sehingga kondisi lingkungan bisa dipantau kapan saja.",
+    points: ["Pembacaan sensor real-time tiap beberapa detik", "Pengiriman data via WiFi ke dashboard web", "Notifikasi sederhana saat nilai melewati batas"]
+  },
+  home: {
+    status: "Concept",
+    title: "Smart Home",
+    body: "Lampu dan perangkat listrik dikontrol lewat relay yang dikendalikan ESP32. Sensor gerak dan cahaya dipakai agar perangkat bisa menyala otomatis sesuai kondisi ruangan, dengan kontrol manual dari antarmuka web.",
+    points: ["Kontrol lampu otomatis berbasis sensor gerak & cahaya", "Modul relay untuk switching perangkat AC", "Panel kontrol manual berbasis web lokal"]
+  },
+  robot: {
+    status: "Experiment",
+    title: "Mini Robot",
+    body: "Robot beroda dua dengan driver motor dan sensor jarak. Program ditulis dalam C/C++ untuk membaca sensor, menentukan arah gerak, serta menghindari halangan di depannya.",
+    points: ["Logika obstacle avoidance dengan sensor ultrasonik", "Kontrol kecepatan motor menggunakan PWM", "Struktur kode modular agar mudah dikembangkan"]
+  },
+  circuit: {
+    status: "Lab Work",
+    title: "Electronic Circuit Project",
+    body: "Eksperimen rangkaian pada breadboard untuk memahami karakteristik resistor, kapasitor, dioda, dan transistor. Hasil pengukuran dibandingkan dengan perhitungan teori dan simulasi.",
+    points: ["Analisis rangkaian seri–paralel dan pembagi tegangan", "Pengukuran dengan multimeter & pembacaan osiloskop", "Dokumentasi skematik dan hasil pengujian"]
+  }
+};
+var modalBg = document.getElementById("modalBg");
+function openModal(key) {
+  var p = projectData[key];
+  if (!p) return;
+  document.getElementById("modalStatus").textContent = p.status;
+  document.getElementById("modalTitle").textContent = p.title;
+  document.getElementById("modalBody").textContent = p.body;
+  var list = document.getElementById("modalPoints");
+  list.innerHTML = "";
+  p.points.forEach(function (text) {
+    var li = document.createElement("li");
+    li.textContent = text;
+    list.appendChild(li);
+  });
+  modalBg.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeModal() {
+  modalBg.classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.querySelectorAll("[data-project]").forEach(function (btn) {
+  btn.addEventListener("click", function () { openModal(btn.getAttribute("data-project")); });
+});
+document.getElementById("modalClose").addEventListener("click", closeModal);
+modalBg.addEventListener("click", function (e) {
+  if (e.target === modalBg) closeModal();
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") closeModal();
+});
+
+/* ===== 10. FORM KONTAK ===== */
+var form = document.getElementById("contactForm");
+var okMsg = document.getElementById("formOk");
+function checkField(errId, isOk, msg) {
+  document.getElementById(errId).textContent = isOk ? "" : msg;
+  return isOk;
+}
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  var name = document.getElementById("fName").value.trim();
+  var email = document.getElementById("fEmail").value.trim();
+  var message = document.getElementById("fMessage").value.trim();
+  var valid = true;
+  valid = checkField("errName", name.length >= 2, "Nama minimal 2 karakter.") && valid;
+  valid = checkField("errEmail", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), "Format email belum valid.") && valid;
+  valid = checkField("errMessage", message.length >= 10, "Pesan minimal 10 karakter.") && valid;
+  if (!valid) return;
+  var btn = document.getElementById("sendBtn");
+  btn.disabled = true;
+  btn.textContent = "Sending...";
+  setTimeout(function () {
+    btn.disabled = false;
+    btn.textContent = "Send Message ✈";
+    form.reset();
+    okMsg.classList.add("show");
+    setTimeout(function () { okMsg.classList.remove("show"); }, 5000);
+  }, 1100);
+});
+  </script>
+</body>
+</html>
